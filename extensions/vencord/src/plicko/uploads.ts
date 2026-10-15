@@ -5,7 +5,6 @@ import {
   DraftType,
   SelectedChannelStore,
   showToast,
-  Toasts,
   UploadHandler,
   UserStore,
 } from "@webpack/common";
@@ -34,7 +33,7 @@ export function handleUploadResponse(response: UploadFilesResponse) {
   for (const [filename, error] of response.errors.entries()) {
     const errMsg = `Failed uploading file ${filename}: ${error}`;
     console.error(errMsg);
-    showToast(errMsg, "failure");
+    showToast({ text: errMsg, variant: "critical" });
   }
 
   if (response.entries.size == 0 && response.errors.size > 0) {
@@ -49,7 +48,7 @@ export function handleUploadResponse(response: UploadFilesResponse) {
     if (entry == null) {
       const errMsg = `Failed uploading file ${filename}, server returned nothing`;
       console.error(errMsg);
-      showToast(errMsg, "failure");
+      showToast({ text: errMsg, variant: "critical" });
       return;
     }
 
@@ -96,10 +95,10 @@ export async function tryUploadAndInsert() {
   } catch (err) {
     console.log(err);
     let error = err as Error;
-    showToast(
-      `Something went wrong while uploading: ${error.message}`,
-      Toasts.Type.FAILURE,
-    );
+    showToast({
+      text: `Something went wrong while uploading: ${error.message}`,
+      variant: "critical",
+    });
     console.error("Fetch failed:", error.cause);
   }
 }
