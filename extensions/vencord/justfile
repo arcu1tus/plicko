@@ -3,18 +3,25 @@ setup:
 		echo "Cloning Vencord..."; \
 		git clone https://github.com/Vendicated/Vencord; \
 	fi
-	mkdir -p Vencord/src/userplugins/
 	cd Vencord && pnpm install
-	if [ ! -L "Vencord/src/userplugins/PlickoVencord" ]; then \
-		ln -s $(pwd)/src Vencord/src/userplugins/PlickoVencord; \
-	fi
+	just link-plugin
 	pnpm install
+
+[private]
+link-plugin:
+	mkdir -p Vencord/src/userplugins/
+	if [ -e "Vencord/src/userplugins/PlickoVencord" ] && [ ! -L "Vencord/src/userplugins/PlickoVencord" ]; then \
+		echo "Cannot link PlickoVencord: path exists and is not a symlink" >&2; \
+		exit 1; \
+	fi
+	# Keep the link valid when the checkout is moved.
+	ln -sfn ../../../src Vencord/src/userplugins/PlickoVencord
 
 inject:
     cd Vencord && pnpm inject
 
-build:
+build: link-plugin
 	cd Vencord && pnpm build
 
-dev:
+dev: link-plugin
     cd Vencord && pnpm build --watch
